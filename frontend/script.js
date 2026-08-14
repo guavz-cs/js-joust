@@ -12,7 +12,7 @@ const BACKEND_URL =
 */
 
 const BACKEND_URL =
-    "https://YOUR-BACKEND-NAME.onrender.com";
+    "https://js-joust-0wc8.onrender.com/";
 
 
 /* =====================================================
