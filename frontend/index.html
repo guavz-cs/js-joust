@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Joust Arena</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <!-- Socket.IO -->
+    <script
+        src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+    ></script>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HOME
+====================================================== -->
+
+<section
+    id="homeScreen"
+    class="screen"
+>
+
+    <div class="home">
+
+        <div class="logo">
+
+            <span>⚔</span>
+
+            JOUST
+
+            <span>⚔</span>
+
+        </div>
+
+
+        <p class="tagline">
+            MOVE. DUEL. SURVIVE.
+        </p>
+
+
+        <div class="homeButtons">
+
+            <button
+                id="createBtn"
+                class="btn primary"
+            >
+                CREATE ARENA
+            </button>
+
+
+            <button
+                id="showJoinBtn"
+                class="btn secondary"
+            >
+                JOIN ARENA
+            </button>
+
+        </div>
+
+
+        <p
+            id="homeError"
+            class="error"
+        ></p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     HOST LOBBY
+====================================================== -->
+
+<section
+    id="hostScreen"
+    class="screen hidden"
+>
+
+    <div class="hostLobby">
+
+        <div class="header">
+
+            <div class="brand">
+                ⚔ JOUST
+            </div>
+
+
+            <div class="connection">
+                <span
+                    id="connectionDot"
+                    class="dot"
+                ></span>
+
+                <span id="connectionText">
+                    CONNECTED
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="roomCard">
+
+            <p class="label">
+                ROOM CODE
+            </p>
+
+
+            <div
+                id="roomCodeDisplay"
+                class="roomCode"
+            >
+                ------
+            </div>
+
+
+            <p class="instruction">
+                Enter this code on your phone.
+            </p>
+
+        </div>
+
+
+        <div class="playersSection">
+
+            <div class="sectionTitle">
+
+                <span>
+                    PLAYERS
+                </span>
+
+                <span>
+                    <strong id="playerCount">
+                        0
+                    </strong>
+                    / 8
+                </span>
+
+            </div>
+
+
+            <div
+                id="playersList"
+                class="playersList"
+            ></div>
+
+        </div>
+
+
+        <button
+            id="startBtn"
+            class="btn primary large"
+            disabled
+        >
+            START JOUST
+        </button>
+
+
+        <p
+            id="hostError"
+            class="error"
+        ></p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     JOIN
+====================================================== -->
+
+<section
+    id="joinScreen"
+    class="screen hidden"
+>
+
+    <div class="joinPanel">
+
+        <div class="logo small">
+            ⚔ JOUST
+        </div>
+
+
+        <h1>
+            JOIN ARENA
+        </h1>
+
+
+        <input
+            id="nameInput"
+            type="text"
+            placeholder="PLAYER NAME"
+            maxlength="14"
+            autocomplete="off"
+        >
+
+
+        <input
+            id="codeInput"
+            type="text"
+            placeholder="ROOM CODE"
+            maxlength="6"
+            autocomplete="off"
+        >
+
+
+        <button
+            id="joinBtn"
+            class="btn primary"
+        >
+            JOIN
+        </button>
+
+
+        <button
+            id="backBtn"
+            class="btn secondary"
+        >
+            BACK
+        </button>
+
+
+        <p
+            id="joinError"
+            class="error"
+        ></p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     CONTROLLER
+====================================================== -->
+
+<section
+    id="controllerScreen"
+    class="screen hidden"
+>
+
+    <div class="controller">
+
+        <header class="controllerHeader">
+
+            <div>
+                ⚔ JOUST
+            </div>
+
+
+            <div
+                id="controllerConnection"
+                class="connection"
+            >
+                CONNECTING
+            </div>
+
+        </header>
+
+
+        <!-- WAITING -->
+
+        <div
+            id="controllerWaiting"
+            class="controllerState"
+        >
+
+            <div class="bigIcon">
+                📱
+            </div>
+
+
+            <h1 id="controllerName">
+                PLAYER
+            </h1>
+
+
+            <p>
+                Your phone is your controller.
+            </p>
+
+
+            <p>
+                Keep it steady until the game starts.
+            </p>
+
+
+            <button
+                id="motionBtn"
+                class="btn primary"
+            >
+                ENABLE MOTION
+            </button>
+
+        </div>
+
+
+
+        <!-- PLAYING -->
+
+        <div
+            id="controllerPlaying"
+            class="controllerState hidden"
+        >
+
+            <div class="liveCircle">
+
+                <div class="livePulse"></div>
+
+                LIVE
+
+            </div>
+
+
+            <h1>
+                STAY ALIVE
+            </h1>
+
+
+            <p>
+                Move carefully.
+            </p>
+
+
+            <div class="meter">
+
+                <div
+                    id="movementBar"
+                    class="meterFill"
+                ></div>
+
+            </div>
+
+
+            <div class="meterLabel">
+                MOVEMENT
+            </div>
+
+        </div>
+
+
+
+        <!-- ELIMINATED -->
+
+        <div
+            id="controllerDead"
+            class="controllerState hidden"
+        >
+
+            <div class="bigIcon">
+                ☠
+            </div>
+
+
+            <h1>
+                ELIMINATED
+            </h1>
+
+
+            <p>
+                Your movement was too great.
+            </p>
+
+        </div>
+
+
+
+        <!-- WINNER -->
+
+        <div
+            id="controllerWinner"
+            class="controllerState hidden"
+        >
+
+            <div class="bigIcon">
+                🏆
+            </div>
+
+
+            <h1>
+                YOU WIN
+            </h1>
+
+
+            <p>
+                Champion of the arena.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     GAME SCREEN
+====================================================== -->
+
+<section
+    id="gameScreen"
+    class="screen hidden"
+>
+
+    <div class="arena">
+
+        <header class="gameHeader">
+
+            <div>
+                ⚔ JOUST
+            </div>
+
+
+            <div>
+                ROUND
+                <strong id="roundNumber">
+                    1
+                </strong>
+            </div>
+
+
+            <div>
+                ALIVE:
+                <strong id="aliveNumber">
+                    0
+                </strong>
+            </div>
+
+        </header>
+
+
+        <div
+            id="countdown"
+            class="countdown hidden"
+        >
+            3
+        </div>
+
+
+        <div
+            id="arenaPlayers"
+            class="arenaPlayers"
+        ></div>
+
+
+        <div
+            id="gameMessage"
+            class="gameMessage"
+        >
+            GET READY
+        </div>
+
+
+        <button
+            id="newRoundBtn"
+            class="btn primary newRound hidden"
+        >
+            NEW ROUND
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
