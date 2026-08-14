@@ -7,6 +7,60 @@ Browser-based motion multiplayer game
 
 
 /* =====================================================
+   PEER CONNECTION CONFIG
+
+   STUN servers help two devices discover how to reach
+   each other. That's enough when both are on friendly
+   networks (e.g. same WiFi).
+
+   TURN servers relay traffic when a direct connection
+   isn't possible (different networks, restrictive
+   firewalls, mobile carrier NATs, etc). Without one,
+   cross-network connections can hang indefinitely.
+
+   These are free public TURN servers (Open Relay Project).
+   Fine for a demo/challenge; for production use you'd want
+   your own TURN credentials (e.g. via Twilio or metered.ca).
+===================================================== */
+
+const PEER_CONFIG = {
+
+    config: {
+
+        iceServers: [
+
+            { urls: "stun:stun.l.google.com:19302" },
+
+            {
+                urls: "turn:openrelay.metered.ca:80",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+
+            {
+                urls: "turn:openrelay.metered.ca:443",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+
+            {
+                urls: "turn:openrelay.metered.ca:443?transport=tcp",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            }
+
+        ]
+
+    }
+
+};
+
+/* How long to wait for a connection before giving up
+   and telling the player, instead of hanging forever. */
+const CONNECTION_TIMEOUT_MS = 10000;
+
+
+/* =====================================================
    GLOBAL STATE
 ===================================================== */
 
@@ -170,7 +224,9 @@ function createRoom() {
 
     peer = new Peer(peerId, {
 
-        debug: 1
+        debug: 1,
+
+        ...PEER_CONFIG
 
     });
 
@@ -1055,7 +1111,7 @@ function joinArena() {
     */
 
     peer =
-        new Peer();
+        new Peer(PEER_CONFIG);
 
 
     peer.on("open", id => {
@@ -1072,9 +1128,25 @@ function joinArena() {
             );
 
 
+        /* If the connection never opens (e.g. TURN relay
+           couldn't be set up in time), stop waiting and
+           tell the player instead of hanging forever. */
+        const connectTimeout =
+            setTimeout(() => {
+
+                status.textContent =
+                    "COULD NOT CONNECT — CHECK THE CODE AND TRY AGAIN";
+
+                hostConnection.close();
+
+            }, CONNECTION_TIMEOUT_MS);
+
+
         hostConnection.on(
             "open",
             () => {
+
+                clearTimeout(connectTimeout);
 
                 hostConnection.send({
 
