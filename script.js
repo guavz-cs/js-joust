@@ -610,6 +610,20 @@ function beginRound() {
             "MOVE CAREFULLY";
 
 
+    const music =
+        document.getElementById("music");
+
+    music.currentTime = 0;
+
+    music.play()
+        .catch(error =>
+            console.warn(
+                "Music blocked:",
+                error
+            )
+        );
+
+
     broadcast({
 
         type: "gameStart",
