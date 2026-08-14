@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Joust Arena</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+
+<body>
+
+    <!-- =========================
+         LANDING SCREEN
+    ========================== -->
+
+    <section id="landingScreen" class="screen">
+
+        <div class="hero">
+
+            <div class="logo">
+                <span>⚔</span>
+                JOUST
+                <span>⚔</span>
+            </div>
+
+            <p class="subtitle">
+                MOVE. DUEL. SURVIVE.
+            </p>
+
+            <div class="menu">
+
+                <button id="hostBtn" class="primary-btn">
+                    CREATE ARENA
+                </button>
+
+                <button id="joinBtn" class="secondary-btn">
+                    JOIN ARENA
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         HOST SETUP
+    ========================== -->
+
+    <section id="hostSetup" class="screen hidden">
+
+        <div class="panel">
+
+            <h1>CREATE ARENA</h1>
+
+            <p>
+                Create a room and share the code with your players.
+            </p>
+
+            <button id="createRoomBtn" class="primary-btn">
+                CREATE ROOM
+            </button>
+
+            <button class="backBtn secondary-btn">
+                BACK
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         JOIN SCREEN
+    ========================== -->
+
+    <section id="joinScreen" class="screen hidden">
+
+        <div class="panel">
+
+            <h1>JOIN ARENA</h1>
+
+            <input
+                id="playerName"
+                type="text"
+                placeholder="Your name"
+                maxlength="12"
+                autocomplete="off"
+            >
+
+            <input
+                id="roomCode"
+                type="text"
+                placeholder="ROOM CODE"
+                maxlength="6"
+                autocomplete="off"
+            >
+
+            <button id="connectBtn" class="primary-btn">
+                JOIN
+            </button>
+
+            <button class="backBtn secondary-btn">
+                BACK
+            </button>
+
+            <p id="joinStatus"></p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         HOST LOBBY
+    ========================== -->
+
+    <section id="lobbyScreen" class="screen hidden">
+
+        <div class="lobby">
+
+            <div class="topBar">
+
+                <div>
+                    <small>ROOM</small>
+                    <strong id="displayRoomCode">------</strong>
+                </div>
+
+                <div>
+                    <small>PLAYERS</small>
+                    <strong id="playerCount">0</strong>
+                </div>
+
+            </div>
+
+
+            <h1>JOUST ARENA</h1>
+
+            <p class="instruction">
+                Join using your phone.
+            </p>
+
+
+            <div class="qr-placeholder">
+
+                <div class="qr-inner">
+                    <div class="qr-title">
+                        ENTER ROOM
+                    </div>
+
+                    <div id="bigRoomCode">
+                        ------
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div id="lobbyPlayers" class="player-list">
+            </div>
+
+
+            <button
+                id="startGameBtn"
+                class="primary-btn large"
+                disabled
+            >
+                START GAME
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         ARENA
+    ========================== -->
+
+    <section id="arenaScreen" class="screen hidden">
+
+        <div class="arena">
+
+            <div class="arenaHeader">
+
+                <div class="brand">
+                    ⚔ JOUST
+                </div>
+
+                <div class="roundStatus">
+                    ROUND <span id="roundNumber">1</span>
+                </div>
+
+                <div class="aliveCount">
+                    ALIVE:
+                    <span id="aliveCount">0</span>
+                </div>
+
+            </div>
+
+
+            <div id="countdown" class="countdown">
+                3
+            </div>
+
+
+            <div id="arenaPlayers" class="arenaPlayers">
+            </div>
+
+
+            <div id="gameMessage" class="gameMessage">
+                GET READY
+            </div>
+
+
+            <button
+                id="resetGameBtn"
+                class="secondary-btn resetBtn hidden"
+            >
+                NEW ROUND
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CONTROLLER
+    ========================== -->
+
+    <section id="controllerScreen" class="screen hidden">
+
+        <div class="controller">
+
+            <div class="controllerHeader">
+
+                <div class="controllerLogo">
+                    ⚔ JOUST
+                </div>
+
+                <div id="controllerStatus">
+                    CONNECTING...
+                </div>
+
+            </div>
+
+
+            <div class="controllerContent">
+
+                <div
+                    id="controllerWaiting"
+                    class="controllerState"
+                >
+
+                    <div class="phoneIcon">
+                        📱
+                    </div>
+
+                    <h1>READY?</h1>
+
+                    <p>
+                        Keep your phone steady.
+                    </p>
+
+                    <p>
+                        Move only when the game begins.
+                    </p>
+
+                    <button
+                        id="motionPermissionBtn"
+                        class="primary-btn"
+                    >
+                        ENABLE MOTION
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="controllerPlaying"
+                    class="controllerState hidden"
+                >
+
+                    <div class="statusCircle">
+
+                        <div class="pulse"></div>
+
+                        <span>LIVE</span>
+
+                    </div>
+
+                    <h1 id="controllerPlayerName">
+                        PLAYER
+                    </h1>
+
+                    <p>
+                        Stay alive.
+                    </p>
+
+                    <div
+                        id="movementMeter"
+                        class="movementMeter"
+                    >
+
+                        <div id="movementBar"></div>
+
+                    </div>
+
+                    <p class="movementText">
+                        MOVEMENT
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="controllerEliminated"
+                    class="controllerState hidden"
+                >
+
+                    <div class="eliminatedIcon">
+                        ☠
+                    </div>
+
+                    <h1>ELIMINATED</h1>
+
+                    <p>
+                        Your movement was detected.
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="controllerWinner"
+                    class="controllerState hidden"
+                >
+
+                    <div class="winnerIcon">
+                        🏆
+                    </div>
+
+                    <h1>YOU WIN!</h1>
+
+                    <p>
+                        Champion of the arena.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         MUSIC
+    ========================== -->
+
+    <audio
+        id="music"
+        loop
+        preload="auto"
+    >
+        <source
+            src="https://cdn.pixabay.com/audio/2022/03/15/audio_8c7a7d9c3d.mp3"
+            type="audio/mpeg"
+        >
+    </audio>
+
+
+    <script src="app.js"></script>
+
+</body>
+</html>
